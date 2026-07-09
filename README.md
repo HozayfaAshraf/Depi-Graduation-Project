@@ -19,7 +19,7 @@ The architecture is built entirely within the Microsoft Azure ecosystem, focusin
 * **Data Warehousing & Serving:** Azure Synapse Analytics (Serverless SQL Pools)
 * **BI & Analytics:** Power BI Desktop
 
-### 🔄 Pipeline Flow
+## 🔄 Pipeline Flow
 ```text
 [Data Sources: GitHub (HTTP) & SQL Server]
                    ⬇️
@@ -28,7 +28,7 @@ The architecture is built entirely within the Microsoft Azure ecosystem, focusin
    [ADLS Gen2: Raw/Bronze Layer] ➡️ [Databricks: PySpark Cleaning] ➡️ [ADLS Gen2: Silver Layer]
                                                                                ⬇️
       [Power BI Dashboards] ⬅️ [Synapse: External Tables (CETAS)] ⬅️ [ADLS Gen2: Gold Layer]
-
+```
 
 ## 🗄️ Data Modeling (Silver Layer Star Schema)
 
