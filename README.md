@@ -29,6 +29,7 @@ The architecture is built entirely within the Microsoft Azure ecosystem, focusin
                                                                                ⬇️
       [Power BI Dashboards] ⬅️ [Synapse: External Tables (CETAS)] ⬅️ [ADLS Gen2: Gold Layer]
 
+
 ## 🗄️ Data Modeling (Silver Layer Star Schema)
 
 To maximize analytical performance, the raw e-commerce data was refactored from flat files into a highly optimized **Star Schema**. This optimizes reporting by isolating descriptive context into Dimension tables and numeric metrics into Fact tables.
@@ -40,9 +41,7 @@ To maximize analytical performance, the raw e-commerce data was refactored from 
 * **`silver.dim_locations`**: Geo-spatial reference table mapping truncated postal `zip_code` prefixes to literal geographic coordinates (`lat`, `lng`).
 
 ### 📊 Fact Tables (The Metrics)
-* **`silver.fact_sales`**: The core transactional table containing monetary granular data (`price`, `freight_value`) and temporal metrics.
-    * *Degenerate Dimension:* `order_id` is kept directly inside the fact table to optimize dashboard joins and execution time.
-    * *Engineered Features:* Includes `delivery_variance_days` (`actual_delivery - estimated_delivery`) to calculate logistic SLA accuracy, alongside a boolean `is_delayed` flag.
+* **`silver.fact_sales`**: The core transactional table containing monetary granular data (`price`, `freight_value`) and temporal metrics. **Degenerate Dimension:** `order_id` is kept directly inside the fact table to optimize dashboard joins and execution time. **Engineered Features:** Includes `delivery_variance_days` (`actual_delivery - estimated_delivery`) to calculate logistic SLA accuracy, alongside a boolean `is_delayed` flag.
 * **`silver.fact_payments`**: Captures financial settlement breakdown. Tracks multi-payment methods (`payment_type`), installment counts, and segmented values per order.
 * **`silver.fact_reviews`**: Contains customer satisfaction metrics (`review_score`) tied to unique transaction windows.
 
@@ -61,14 +60,13 @@ Using **Azure Databricks (PySpark)**, the notebook processes raw bronze data thr
 * Writes optimized, compressed **Parquet format** partitions into the `silver/` ADLS directory.
 
 ### 3. Gold Layer (Aggregation & Persistence)
-Instead of executing resource-intensive real-time joins during BI refreshes, the business logic is persisted physically using Azure Synapse Serverless SQL. 
-Using **CETAS** (`CREATE EXTERNAL TABLE AS SELECT`) backed by a secure Database Scoped Credential (Managed Identity), Synapse materializes pre-aggregated data models into the `gold/` directory as physical Snappy-compressed Parquet files:
-* `gold.ext_sales_overview`: Executive revenue performance and geographic trends.
-* `gold.ext_product_performance`: Sales volume and velocity metrics aggregated across categories.
-* `gold.ext_logistics_efficiency`: High-impact delivery fulfillment timelines and SLA breach analysis.
-* `gold.ext_payment_behavior`: Installment trends and payment preferences over time.
+Instead of executing resource-intensive real-time joins during BI refreshes, the business logic is persisted physically using Azure Synapse Serverless SQL. Using **CETAS** (`CREATE EXTERNAL TABLE AS SELECT`) backed by a secure Database Scoped Credential (Managed Identity), Synapse materializes pre-aggregated data models into the `gold/` directory as physical Snappy-compressed Parquet files:
+* **`gold.ext_sales_overview`**: Executive revenue performance and geographic trends.
+* **`gold.ext_product_performance`**: Sales volume and velocity metrics aggregated across categories.
+* **`gold.ext_logistics_efficiency`**: High-impact delivery fulfillment timelines and SLA breach analysis.
+* **`gold.ext_payment_behavior`**: Installment trends and payment preferences over time.
 
-This approach optimizes reporting performance and cuts Synapse Serverless data-scanning costs significantly.
+> **Note:** This physical materialization approach heavily optimizes reporting performance and cuts Synapse Serverless data-scanning costs significantly.
 
 ---
 
