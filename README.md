@@ -9,6 +9,7 @@ This project establishes a robust, enterprise-grade cloud data pipeline leveragi
 ---
 
 ## 🏗️ Technical Architecture & Tech Stack
+<img width="1057" height="380" alt="image" src="https://github.com/user-attachments/assets/1510c3dd-4dba-4c2f-9275-0dd2e31e7407" />
 
 The architecture is built entirely within the Microsoft Azure ecosystem, focusing on automating ingestion, decoupling storage from compute, optimizing data scanning costs, and enforcing strict data security:
 
