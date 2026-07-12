@@ -5,12 +5,11 @@
 
 ## 📌 Project Overview
 This project establishes a robust, enterprise-grade cloud data pipeline leveraging the **Medallion Architecture (Bronze ➡️ Silver ➡️ Gold)**. Using the Brazilian E-Commerce (Olist) dataset, the pipeline automatically ingests data from multiple sources, builds a cleaned dimensional data model (Star Schema), and persists high-performance business aggregations. The final architecture serves structured data directly into **Power BI** for strategic decision-making.
+<img width="1057" height="380" alt="image" src="https://github.com/user-attachments/assets/1510c3dd-4dba-4c2f-9275-0dd2e31e7407" />
 
 ---
 
 ## 🏗️ Technical Architecture & Tech Stack
-<img width="1057" height="380" alt="image" src="https://github.com/user-attachments/assets/1510c3dd-4dba-4c2f-9275-0dd2e31e7407" />
-
 The architecture is built entirely within the Microsoft Azure ecosystem, focusing on automating ingestion, decoupling storage from compute, optimizing data scanning costs, and enforcing strict data security:
 
 * **Data Sources:** HTTP (via GitHub) & SQL Server
@@ -30,6 +29,32 @@ The architecture is built entirely within the Microsoft Azure ecosystem, focusin
                                                                                ⬇️
       [Power BI Dashboards] ⬅️ [Synapse: External Tables (CETAS)] ⬅️ [ADLS Gen2: Gold Layer]
 ```
+---
+
+## ⚙️ Orchestration & Orchestrated Workflow (Azure Data Factory)
+
+The entire end-to-end lifecycle is fully automated and orchestrated using **Azure Data Factory (ADF)**. The workflow is split into two distinct, decoupled pipelines to enforce modular design principles: an Ingestion Pipeline and an Orchestrator (Master) Pipeline.
+
+### 1. Ingestion Pipeline (`PL_Ingest_ECommerce`)
+This pipeline handles the heavy lifting of moving raw transactional files from external endpoints into the **Bronze Layer** of our Azure Data Lake (ADLS Gen2). 
+* **HTTP Connector:** Ingests e-commerce datasets directly from public source repositories via REST endpoints.
+* **SQL Server Connector:** Establishes a hybrid integration runtime to securely pull relational transactional data.
+* **Parallel Execution:** Data copying tasks run in parallel to maximize throughput and drastically reduce ingestion window times.
+
+<img width="920" height="287" alt="image" src="https://github.com/user-attachments/assets/bf1d1300-5acc-4138-9072-5548f28ae994" />
+
+### 2. Master Orchestrator Pipeline (`PL_Master_Orchestrator`)
+To guarantee strict sequence dependencies (preventing downstream tables from refreshing if upstream processing fails), a Master Orchestration pipeline acts as the "Single Pane of Glass" controller for the entire project.
+
+* **Execute Pipeline Activity:** First, it invokes `PL_Ingest_ECommerce` to bring in the latest daily raw data.
+* **Databricks Notebook Activity:** Upon successful ingestion, it sends a payload token to spin up an ephemeral cluster and run the **Silver Layer** PySpark cleaning scripts.
+* **Synapse Script Activity:** Once data is cleaned and saved, it triggers **Serverless SQL** queries to execute the Gold Layer CETAS transformations.
+* **Web Activity Alerting:** Hooks into an external **Azure Logic App** webhook. If the pipeline succeeds, it pushes a localized JSON metadata payload containing the pipeline metrics to automatically send a **Success Email Alert**.
+
+<img width="1020" height="282" alt="image" src="https://github.com/user-attachments/assets/f67e56bf-176d-42a5-9407-4f591ecc47e7" />
+
+### 📅 Pipeline Scheduling & Automation
+The master orchestrator is tied to a **Schedule Trigger** configured to execute on a recurring daily cron window. Because the system utilizes Azure **System-Assigned Managed Identity (SAMI)**, the pipelines securely authenticate across Databricks and Synapse without storing static passwords or connection strings in the configuration code.
 
 ## 🗄️ Data Modeling (Silver Layer Star Schema)
 
