@@ -5,7 +5,7 @@
 
 ## 📌 Project Overview
 This project establishes a robust, enterprise-grade cloud data pipeline leveraging the **Medallion Architecture (Bronze ➡️ Silver ➡️ Gold)**. Using the Brazilian E-Commerce (Olist) dataset, the pipeline automatically ingests data from multiple sources, builds a cleaned dimensional data model (Star Schema), and persists high-performance business aggregations. The final architecture serves structured data directly into **Power BI** for strategic decision-making.
-<img width="1057" height="380" alt="image" src="https://github.com/user-attachments/assets/1510c3dd-4dba-4c2f-9275-0dd2e31e7407" />
+<img width="1370" height="407" alt="diagram-export-7-19-2026-12_31_20-AM" src="https://github.com/user-attachments/assets/2b7dee54-ef19-40e0-bcf6-ce64ea1984c5" />
 
 ---
 
